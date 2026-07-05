@@ -1,12 +1,16 @@
 ---
+import { getCollection } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import StatusBoard from '../components/StatusBoard.tsx';
 
-// Placeholder readout — Phase 3 replaces this with live Uptime Kuma data.
-const services = [
-  { label: 'Dungeon Crawler', status: 'unknown', text: 'awaiting telemetry' },
-  { label: 'TrackBoard', status: 'unknown', text: 'awaiting telemetry' },
-  { label: 'Astral Surveyor', status: 'unknown', text: 'awaiting telemetry' },
-];
+// every project with a Kuma monitor appears on the board
+const monitored = (await getCollection('projects'))
+  .filter((project) => project.data.monitor)
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((project) => ({
+    key: project.data.monitor as string,
+    label: project.data.title,
+  }));
 
 const sections = [
   { href: '/projects', name: 'projects', desc: 'games and apps, self-hosted. the launcher.' },
@@ -33,20 +37,7 @@ const sections = [
   <div class="rack">
     <section class="module" aria-label="Systems status">
       <div class="rail"><h2>Systems</h2></div>
-      <div class="status-rows">
-        {
-          services.map((service) => (
-            <div class="svc">
-              <span class:list={['led', service.status]} aria-hidden="true" />
-              <span class="name">{service.label}</span>
-              <span class="st">{service.text}</span>
-            </div>
-          ))
-        }
-      </div>
-      <p class="board-note dim">
-        live status via the homelab's uptime monitor — coming online
-      </p>
+      <StatusBoard client:idle services={monitored} />
     </section>
 
     <section class="module" aria-label="Sections">
@@ -119,40 +110,6 @@ const sections = [
     display: flex;
     flex-direction: column;
     gap: 1.1rem;
-  }
-
-  .status-rows {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .svc {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 0.55rem 0;
-    font-size: 0.9rem;
-    border-bottom: 1px solid var(--panel-edge);
-  }
-
-  .svc:last-child {
-    border-bottom: 0;
-  }
-
-  .svc .name {
-    flex: 1;
-  }
-
-  .svc .st {
-    font-size: 0.68rem;
-    color: var(--ink-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .board-note {
-    font-size: 0.72rem;
-    margin: 0.8rem 0 0;
   }
 
   .dirs {
