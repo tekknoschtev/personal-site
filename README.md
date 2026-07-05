@@ -21,7 +21,8 @@ Frontmatter is validated against `src/content.config.ts` at build time.
 | Collection | Directory | What an entry is |
 |---|---|---|
 | projects | `src/content/projects/` | a card on the projects wall; body = writeup page |
-| workshop | `src/content/workshop/` | a made thing (woodworking / art) with photo + caption |
+| workshop | `src/content/workshop/` | a woodworking piece with photo + caption |
+| art | `src/content/art/` | an artwork (paint, pastel, spray…) on the quiet gallery wall |
 | sky | `src/content/sky/` | an astrophotography capture |
 | log | `src/content/log/` | a one-line-to-one-paragraph changelog entry |
 

@@ -1,0 +1,139 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+
+const pieces = (await getCollection('art')).sort(
+  (a, b) =>
+    a.data.order - b.data.order ||
+    (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0),
+);
+
+function iso(date: Date | undefined): string | null {
+  return date ? date.toISOString().slice(0, 10) : null;
+}
+---
+
+<Base
+  title="art"
+  description="Painting, drawing, pastel, spray paint — a quiet gallery, no feed."
+>
+  <h1>art</h1>
+  <p class="lede">
+    Painting, drawing, pastel, spray paint. This work used to go to
+    Instagram; now it hangs here instead — no feed, no algorithm, just the
+    pieces.
+  </p>
+
+  {
+    pieces.length === 0 ? (
+      <p class="dim">walls are bare at the moment — pieces coming soon.</p>
+    ) : (
+      <div class="gallery">
+        {pieces.map((piece) => (
+          <figure class="piece">
+            {piece.data.image ? (
+              <Image
+                src={piece.data.image}
+                alt={piece.data.title}
+                width={1100}
+                loading="lazy"
+              />
+            ) : (
+              <div class="no-photo" aria-hidden="true">
+                photo pending
+              </div>
+            )}
+            <figcaption>
+              <span class="row">
+                <strong>{piece.data.title}</strong>
+                {piece.data.medium ? (
+                  <span class="medium">{piece.data.medium}</span>
+                ) : null}
+                {iso(piece.data.date) ? (
+                  <time datetime={iso(piece.data.date)!}>
+                    {iso(piece.data.date)}
+                  </time>
+                ) : null}
+              </span>
+              {piece.data.caption ? (
+                <span class="cap">{piece.data.caption}</span>
+              ) : null}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    )
+  }
+</Base>
+
+<style>
+  /* one piece at a time, full width, never cropped — a wall, not a feed */
+  .gallery {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    margin-top: 2.5rem;
+    max-width: 46rem;
+  }
+
+  .piece {
+    margin: 0;
+  }
+
+  .piece img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--panel-edge);
+    border-radius: 2px;
+  }
+
+  .no-photo {
+    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    color: var(--ink-dim);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--panel-edge);
+    border-radius: 2px;
+    background: var(--panel);
+  }
+
+  figcaption {
+    padding: 0.7rem 0.15rem 0;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+  }
+
+  .row strong {
+    font-size: 0.92rem;
+  }
+
+  .medium {
+    font-size: 0.78rem;
+    color: var(--ink-dim);
+    font-style: italic;
+  }
+
+  time {
+    font-size: 0.72rem;
+    color: var(--amber-deep);
+    letter-spacing: 0.06em;
+    margin-left: auto;
+  }
+
+  .cap {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+    max-width: 38rem;
+  }
+</style>

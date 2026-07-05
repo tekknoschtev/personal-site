@@ -6,78 +6,59 @@ import Base from '../layouts/Base.astro';
 const pieces = (await getCollection('workshop')).sort(
   (a, b) => a.data.order - b.data.order,
 );
-
-const groups = [
-  { category: 'woodworking' as const, heading: 'woodworking' },
-  { category: 'art' as const, heading: 'art' },
-].map((group) => ({
-  ...group,
-  pieces: pieces.filter((piece) => piece.data.category === group.category),
-}));
 ---
 
 <Base
   title="workshop"
-  description="Woodworking and art — pieces made by hand, in wood and pigment."
+  description="Woodworking — pieces made by hand, out of actual trees."
 >
   <h1>workshop</h1>
   <p class="lede">
-    The physical half of the operation: woodworking and art — painting,
-    drawing, pastel, spray paint. Same maker, different materials.
+    Woodworking — furniture and smaller pieces, made by hand out of actual
+    trees. The other kind of making (paint and pastel) has <a href="/art">its own wall</a>.
   </p>
 
   {
     pieces.length === 0 ? (
       <p class="dim">nothing on the bench yet — pieces coming soon.</p>
     ) : (
-      groups.map((group) =>
-        group.pieces.length === 0 ? null : (
-          <section>
-            <h2>{group.heading}</h2>
-            <div class="gallery">
-              {group.pieces.map((piece) => (
-                <figure class="piece">
-                  {piece.data.image ? (
-                    <Image
-                      src={piece.data.image}
-                      alt={piece.data.title}
-                      width={800}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div class="no-photo" aria-hidden="true">
-                      photo pending
-                    </div>
-                  )}
-                  <figcaption>
-                    <span class="row">
-                      <strong>{piece.data.title}</strong>
-                      {piece.data.medium ? (
-                        <span class="tag">{piece.data.medium}</span>
-                      ) : null}
-                    </span>
-                    <span class="cap">{piece.data.caption}</span>
-                  </figcaption>
-                </figure>
-              ))}
-            </div>
-          </section>
-        ),
-      )
+      <div class="gallery">
+        {pieces.map((piece) => (
+          <figure class="piece">
+            {piece.data.image ? (
+              <Image
+                src={piece.data.image}
+                alt={piece.data.title}
+                width={800}
+                loading="lazy"
+              />
+            ) : (
+              <div class="no-photo" aria-hidden="true">
+                photo pending
+              </div>
+            )}
+            <figcaption>
+              <span class="row">
+                <strong>{piece.data.title}</strong>
+                {piece.data.medium ? (
+                  <span class="tag">{piece.data.medium}</span>
+                ) : null}
+              </span>
+              <span class="cap">{piece.data.caption}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
     )
   }
 </Base>
 
 <style>
-  h2 {
-    margin-top: 2.5rem;
-  }
-
   .gallery {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.3rem;
-    margin-top: 1rem;
+    margin-top: 2rem;
   }
 
   @media (max-width: 640px) {

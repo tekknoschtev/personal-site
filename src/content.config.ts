@@ -31,8 +31,21 @@ const workshop = defineCollection({
     z.object({
       title: z.string(),
       caption: z.string(),
-      category: z.enum(['woodworking', 'art']),
-      // e.g. "walnut & maple", "soft pastel", "spray paint on canvas"
+      // e.g. "walnut & maple", "red oak"
+      medium: z.string().optional(),
+      image: image().optional(),
+      date: z.date().optional(),
+      order: z.number().default(99),
+    }),
+});
+
+const art = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/art' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      caption: z.string().optional(),
+      // e.g. "soft pastel", "spray paint on canvas", "graphite"
       medium: z.string().optional(),
       image: image().optional(),
       date: z.date().optional(),
@@ -64,4 +77,4 @@ const log = defineCollection({
   }),
 });
 
-export const collections = { projects, workshop, sky, log };
+export const collections = { projects, workshop, art, sky, log };
