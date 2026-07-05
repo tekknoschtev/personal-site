@@ -28,8 +28,7 @@ const { title, description = 'Maker and DIYer. Code, wood, art, and sky.' } =
     </main>
     <footer>
       <div class="inner">
-        <span class="dim">made by hand, hosted at home</span>
-        <span class="dim">·</span>
+        <span class="dim">made by hand · hosted at home</span>
         <a href="/log">changelog</a>
       </div>
     </footer>
@@ -38,18 +37,25 @@ const { title, description = 'Maker and DIYer. Code, wood, art, and sky.' } =
 
 <style>
   footer {
-    border-top: 1px solid var(--border);
-    background: var(--bg-inset);
-    font-family: var(--font-mono);
-    font-size: 0.78rem;
+    border-top: 1px solid var(--panel-edge);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
   }
 
   footer .inner {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 0.9rem 1.25rem;
+    padding: 1.1rem 1.4rem 2rem;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.5rem;
+    gap: 0.5rem 1rem;
+  }
+
+  footer a {
+    color: var(--ink-dim);
+  }
+
+  footer a:hover {
+    color: var(--amber);
   }
 </style>

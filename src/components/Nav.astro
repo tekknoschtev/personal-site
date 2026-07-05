@@ -14,7 +14,7 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 <header>
   <nav aria-label="Main">
-    <a class="site-name" href="/">sjschroeder<span class="dim">.com</span></a>
+    <a class="site-name" href="/">sjschroeder.com</a>
     <ul>
       {
         links.map((link) => (
@@ -34,57 +34,52 @@ const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 <style>
   header {
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-inset);
+    border-bottom: 1px solid var(--panel-edge);
   }
 
   nav {
     max-width: var(--max-width);
     margin: 0 auto;
-    padding: 0.75rem 1.25rem;
+    padding: 1.1rem 1.4rem;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
-    gap: 0.5rem 1.5rem;
-    font-family: var(--font-mono);
+    gap: 0.4rem 1.5rem;
+    font-size: 0.85rem;
   }
 
   .site-name {
-    color: var(--green);
+    color: var(--amber);
+    font-weight: 700;
     text-decoration: none;
-    font-size: 0.95rem;
+    margin-right: auto;
+  }
+
+  .site-name:hover {
+    color: var(--ink);
   }
 
   ul {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.25rem 1rem;
+    gap: 0.25rem 1.4rem;
     list-style: none;
     margin: 0;
     padding: 0;
-    font-size: 0.85rem;
   }
 
   ul a {
     color: var(--ink-dim);
     text-decoration: none;
-    padding: 0.15rem 0;
-  }
-
-  ul a::before {
-    content: './';
-    color: var(--border);
+    padding-bottom: 2px;
   }
 
   ul a:hover {
-    color: var(--green);
+    color: var(--ink);
   }
 
   ul a[aria-current='page'] {
     color: var(--amber);
-  }
-
-  ul a[aria-current='page']::before {
-    color: var(--amber);
+    border-bottom: 2px solid var(--amber-deep);
   }
 </style>
