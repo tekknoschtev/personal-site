@@ -1,0 +1,55 @@
+---
+import Nav from '../components/Nav.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Maker and DIYer. Code, wood, art, and sky.' } =
+  Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title === 'sjschroeder.com' ? title : `${title} · sjschroeder.com`}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <Nav />
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <div class="inner">
+        <span class="dim">made by hand, hosted at home</span>
+        <span class="dim">·</span>
+        <a href="/log">changelog</a>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  footer {
+    border-top: 1px solid var(--border);
+    background: var(--bg-inset);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+
+  footer .inner {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0.9rem 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+</style>

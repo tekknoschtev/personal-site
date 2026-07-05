@@ -1,0 +1,159 @@
+/* ------------------------------------------------------------------
+   sjschroeder.com — global theme
+   Retro computing + space, held lightly.
+   Hub leans in; content pages stay readable-first.
+   ------------------------------------------------------------------ */
+
+:root {
+  /* space */
+  --bg: #0b0f14;
+  --bg-raised: #121821;
+  --bg-inset: #070a0e;
+
+  /* phosphor */
+  --ink: #c9d4cf;
+  --ink-dim: #7d8a85;
+  --green: #6bf178;
+  --green-dim: #3a8a48;
+  --amber: #ffb454;
+  --cyan: #6cc5e0;
+  --red: #f26d6d;
+
+  --border: #223041;
+  --border-glow: rgba(107, 241, 120, 0.25);
+
+  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo,
+    Consolas, 'DejaVu Sans Mono', monospace;
+  --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+
+  --max-width: 52rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* ---- type ---- */
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-mono);
+  color: var(--green);
+  line-height: 1.25;
+  margin: 2rem 0 0.75rem;
+}
+
+h1 {
+  font-size: 1.6rem;
+}
+
+h2 {
+  font-size: 1.2rem;
+}
+
+h3 {
+  font-size: 1rem;
+}
+
+/* mono section markers, e.g. "## workshop" vibes without the noise */
+h1::before,
+h2::before {
+  color: var(--green-dim);
+  content: '// ';
+}
+
+p {
+  margin: 0.75rem 0;
+}
+
+a {
+  color: var(--cyan);
+  text-decoration-color: rgba(108, 197, 224, 0.4);
+  text-underline-offset: 3px;
+}
+
+a:hover {
+  color: var(--green);
+  text-decoration-color: var(--green-dim);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+}
+
+hr {
+  border: none;
+  border-top: 1px dashed var(--border);
+  margin: 2rem 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---- shared bits ---- */
+
+.dim {
+  color: var(--ink-dim);
+}
+
+.prompt::before {
+  content: '> ';
+  color: var(--green-dim);
+}
+
+/* small mono tag/chip, used for statuses and card metadata */
+.tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-dim);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
+}
+
+/* focus visibility on a dark theme */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--green-dim);
+  color: var(--bg);
+}
