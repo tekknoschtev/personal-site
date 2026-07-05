@@ -1,5 +1,19 @@
 ---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import Base from '../layouts/Base.astro';
+
+const pieces = (await getCollection('workshop')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+
+const groups = [
+  { category: 'woodworking' as const, heading: 'woodworking' },
+  { category: 'art' as const, heading: 'art' },
+].map((group) => ({
+  ...group,
+  pieces: pieces.filter((piece) => piece.data.category === group.category),
+}));
 ---
 
 <Base
@@ -7,12 +21,122 @@ import Base from '../layouts/Base.astro';
   description="Woodworking and art — pieces made by hand, in wood and pigment."
 >
   <h1>workshop</h1>
-  <p>
+  <p class="lede">
     The physical half of the operation: woodworking and art — painting,
     drawing, pastel, spray paint. Same maker, different materials.
   </p>
-  <p class="dim">
-    gallery structure lands in phase 4; photos and
-    captions to follow.
-  </p>
+
+  {
+    pieces.length === 0 ? (
+      <p class="dim">nothing on the bench yet — pieces coming soon.</p>
+    ) : (
+      groups.map((group) =>
+        group.pieces.length === 0 ? null : (
+          <section>
+            <h2>{group.heading}</h2>
+            <div class="gallery">
+              {group.pieces.map((piece) => (
+                <figure class="piece">
+                  {piece.data.image ? (
+                    <Image
+                      src={piece.data.image}
+                      alt={piece.data.title}
+                      width={800}
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div class="no-photo" aria-hidden="true">
+                      photo pending
+                    </div>
+                  )}
+                  <figcaption>
+                    <span class="row">
+                      <strong>{piece.data.title}</strong>
+                      {piece.data.medium ? (
+                        <span class="tag">{piece.data.medium}</span>
+                      ) : null}
+                    </span>
+                    <span class="cap">{piece.data.caption}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+        ),
+      )
+    )
+  }
 </Base>
+
+<style>
+  h2 {
+    margin-top: 2.5rem;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.3rem;
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    .gallery {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .piece {
+    margin: 0;
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .piece img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+
+  .no-photo {
+    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    color: var(--ink-dim);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+    background:
+      repeating-linear-gradient(
+        45deg,
+        transparent 0 14px,
+        rgba(255, 255, 255, 0.02) 14px 28px
+      ),
+      var(--bg);
+  }
+
+  figcaption {
+    padding: 0.8rem 1rem 1rem;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 0.8rem;
+  }
+
+  .row strong {
+    font-size: 0.92rem;
+  }
+
+  .cap {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+  }
+</style>
