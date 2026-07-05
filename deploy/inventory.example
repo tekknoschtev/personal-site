@@ -1,0 +1,4 @@
+# hand-type as ~/homelab/inventory (or merge into your existing one).
+# fix the IP to whatever the LXC gets on 192.168.4.x.
+[site]
+192.168.4.50 ansible_user=root

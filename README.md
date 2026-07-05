@@ -64,4 +64,5 @@ hub board automatically.
 Static files served by nginx in an LXC, exposed through a Cloudflare
 tunnel (TLS terminates at Cloudflare's edge). Day-to-day deploys are a
 pull-and-rebuild script on the container; first-time container setup is
-an Ansible playbook. Both land in `deploy/` (phase 5).
+an Ansible playbook. Everything lives in [`deploy/`](deploy/README.md) —
+the README there is the full runbook, from `pct create` to the tunnel.
