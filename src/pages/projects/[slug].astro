@@ -1,0 +1,64 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { title, tagline, url, repo, tech } = project.data;
+const { Content } = await render(project);
+---
+
+<Base title={title} description={tagline}>
+  <p class="crumb"><a href="/projects">projects</a> /</p>
+  <h1>{title}</h1>
+  <p class="lede">{tagline}</p>
+  <p class="meta">
+    {tech.map((t: string) => <span class="tag">{t}</span>)}
+    {url ? <a href={url}>launch <span aria-hidden="true">→</span></a> : null}
+    {repo ? <a href={repo}>source</a> : null}
+  </p>
+  <hr />
+  <div class="writeup">
+    <Content />
+  </div>
+</Base>
+
+<style>
+  .crumb {
+    font-size: 0.8rem;
+    color: var(--ink-dim);
+    margin: 0 0 0.25rem;
+  }
+
+  .crumb a {
+    color: var(--ink-dim);
+    text-decoration: none;
+  }
+
+  .crumb a:hover {
+    color: var(--amber);
+  }
+
+  h1 {
+    margin-top: 0.5rem;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+  }
+
+  .writeup {
+    max-width: 42rem;
+  }
+</style>
