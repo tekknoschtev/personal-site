@@ -30,6 +30,24 @@ A project with a `url` links out; without one, its card points at the
 generated writeup page. A project with a `monitor` name appears on the hub
 status board and gets a live/offline LED on its card.
 
+### Bulk-seeding art from Instagram
+
+Old Instagram posts can seed the art wall via the official data export
+(Accounts Center → Your information and permissions → Download your
+information → **JSON** format). Unzip it, then:
+
+```sh
+node scripts/import-instagram.mjs path/to/export --dry-run   # preview
+node scripts/import-instagram.mjs path/to/export             # import
+```
+
+One markdown file + image per post: caption becomes title/caption
+(hashtag-only lines dropped, export mojibake fixed), post date becomes
+`date`. Useful flags: `--since 2020-01-01`, `--match "pastel|painting"`,
+`--all-images` (one entry per carousel image). Existing entries are never
+overwritten — edit or delete generated files freely and re-run safely.
+`medium:` can't be inferred, so add it by hand where you want it shown.
+
 ## Status board (Uptime Kuma)
 
 The hub's "systems" board and the project-card LEDs read from an
