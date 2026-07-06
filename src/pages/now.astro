@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import { Content, frontmatter } from '../content/now.md';
+
+const updated: string = String(frontmatter.updated).slice(0, 10);
+---
+
+<Base
+  title="now"
+  description="What's on the bench right now — current builds, queue, and blockers."
+>
+  <h1>now</h1>
+  <p class="lede">
+    What I'm making <em>right now</em> — the workbench view, as opposed to
+    the <a href="/log">log</a> (what already happened). Inspired
+    by <a href="https://nownownow.com/about">/now pages</a>.
+  </p>
+  <p class="stamp dim">last updated <time datetime={updated}>{updated}</time></p>
+
+  <div class="now-body">
+    <Content />
+  </div>
+</Base>
+
+<style>
+  .stamp {
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+  }
+
+  .stamp time {
+    color: var(--amber-deep);
+  }
+
+  .now-body {
+    max-width: 40rem;
+  }
+
+  .now-body :global(h2) {
+    margin-top: 2.2rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .now-body :global(ul) {
+    padding-left: 1.2rem;
+    margin: 0.5rem 0;
+  }
+
+  .now-body :global(li) {
+    margin: 0.45rem 0;
+    color: var(--ink);
+  }
+
+  .now-body :global(li)::marker {
+    color: var(--amber-deep);
+  }
+
+  .now-body :global(em) {
+    color: var(--ink-dim);
+  }
+</style>
