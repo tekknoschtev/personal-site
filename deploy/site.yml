@@ -1,0 +1,102 @@
+---
+# One-time bootstrap of the site container. Hand-type this file and
+# inventory.example into ~/homelab, then:
+#
+#   ansible-playbook -i inventory site.yml
+#
+# Everything it copies (nginx config, deploy script) comes from the
+# cloned repo on the target, so this file is all the Ansible there is.
+# Day-to-day deploys use /usr/local/bin/deploy-site instead.
+
+- name: bootstrap sjschroeder.com container
+  hosts: site
+  become: true
+
+  vars:
+    repo: https://github.com/tekknoschtev/personal-site.git
+    app: /opt/personal-site
+
+  tasks:
+    - name: install packages
+      ansible.builtin.apt:
+        name:
+          - git
+          - nginx
+          - rsync
+          - curl
+          - ca-certificates
+        update_cache: true
+
+    - name: add nodesource apt repo
+      ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+      args:
+        creates: /etc/apt/sources.list.d/nodesource.list
+
+    - name: install node 22
+      ansible.builtin.apt:
+        name: nodejs
+        update_cache: true
+
+    - name: clone the site repo
+      ansible.builtin.git:
+        repo: "{{ repo }}"
+        dest: "{{ app }}"
+        version: main
+
+    - name: create .env from the example (edit later for kuma)
+      ansible.builtin.copy:
+        src: "{{ app }}/.env.example"
+        dest: "{{ app }}/.env"
+        remote_src: true
+        force: false
+
+    - name: install deploy script
+      ansible.builtin.copy:
+        src: "{{ app }}/deploy/deploy.sh"
+        dest: /usr/local/bin/deploy-site
+        mode: "0755"
+        remote_src: true
+
+    - name: install nginx site config
+      ansible.builtin.copy:
+        src: "{{ app }}/deploy/nginx-site.conf"
+        dest: /etc/nginx/sites-available/site
+        remote_src: true
+
+    - name: enable the site
+      ansible.builtin.file:
+        src: /etc/nginx/sites-available/site
+        dest: /etc/nginx/sites-enabled/site
+        state: link
+
+    - name: remove default nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: create web root
+      ansible.builtin.file:
+        path: /var/www/site
+        state: directory
+        owner: www-data
+        group: www-data
+
+    - name: first build and publish
+      ansible.builtin.command: /usr/local/bin/deploy-site
+      args:
+        creates: /var/www/site/index.html
+
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+        enabled: true
+
+    - name: download cloudflared
+      ansible.builtin.get_url:
+        url: https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+        dest: /tmp/cloudflared.deb
+
+    - name: install cloudflared (tunnel setup is manual, see README)
+      ansible.builtin.apt:
+        deb: /tmp/cloudflared.deb

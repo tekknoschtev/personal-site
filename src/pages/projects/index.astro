@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+
+const projects = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<Base
+  title="projects"
+  description="Games and apps, mostly self-hosted in the homelab. This is the launcher."
+>
+  <h1>projects</h1>
+  <p class="lede">
+    Games and apps, mostly self-hosted on their own subdomains. This page is a
+    launcher — everything links out to the live thing, or to a writeup for the
+    ones that aren't public yet.
+  </p>
+
+  <div class="wall">
+    {projects.map((project) => <ProjectCard project={project} />)}
+  </div>
+</Base>
+
+<script>
+  // light up the card LEDs from Uptime Kuma; leaves them grey if the
+  // monitor is unreachable or not configured
+  import { fetchKumaStatus } from '../../lib/kuma';
+
+  const statuses = await fetchKumaStatus();
+  if (statuses) {
+    for (const led of document.querySelectorAll<HTMLElement>('[data-monitor]')) {
+      const status = statuses[led.dataset.monitor ?? ''];
+      led.classList.remove('on', 'off', 'unknown');
+      if (status?.state === 'up') {
+        led.classList.add('on');
+        led.title = 'online';
+      } else if (status?.state === 'down') {
+        led.classList.add('off');
+        led.title = 'offline';
+      } else {
+        led.classList.add('unknown');
+        led.title = status ? status.state : 'not monitored';
+      }
+    }
+  }
+</script>
+
+<style>
+  .wall {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.1rem;
+  }
+
+  @media (max-width: 640px) {
+    .wall {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

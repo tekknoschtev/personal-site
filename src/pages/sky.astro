@@ -1,0 +1,138 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+
+const captures = (await getCollection('sky')).sort(
+  (a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0),
+);
+
+function iso(date: Date | undefined): string | null {
+  return date ? date.toISOString().slice(0, 10) : null;
+}
+---
+
+<Base
+  title="sky"
+  description="Astrophotography. Just getting started — a few honest captures."
+>
+  <h1>sky</h1>
+  <p class="lede">
+    Astrophotography. I'm just getting started with this one — a few captures
+    so far, more as clear nights and practice allow. Posted as they happen,
+    not curated to look like a portfolio.
+  </p>
+
+  {
+    captures.length === 0 ? (
+      <p class="dim">no captures up yet — waiting on clear skies.</p>
+    ) : (
+      <div class="captures">
+        {captures.map((capture) => (
+          <figure class="capture">
+            {capture.data.image ? (
+              <Image
+                src={capture.data.image}
+                alt={capture.data.title}
+                width={1000}
+                loading="lazy"
+              />
+            ) : (
+              <div class="no-photo" aria-hidden="true">
+                image pending
+              </div>
+            )}
+            <figcaption>
+              <span class="row">
+                <strong>{capture.data.title}</strong>
+                {capture.data.target ? (
+                  <span class="tag">{capture.data.target}</span>
+                ) : null}
+                {iso(capture.data.date) ? (
+                  <time datetime={iso(capture.data.date)!}>
+                    {iso(capture.data.date)}
+                  </time>
+                ) : null}
+              </span>
+              {capture.data.caption ? (
+                <span class="cap">{capture.data.caption}</span>
+              ) : null}
+              {capture.data.gear ? (
+                <span class="gear">{capture.data.gear}</span>
+              ) : null}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    )
+  }
+</Base>
+
+<style>
+  .captures {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    max-width: 46rem;
+  }
+
+  .capture {
+    margin: 0;
+    background: var(--panel);
+    border: 1px solid var(--panel-edge);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .capture img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .no-photo {
+    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    color: var(--ink-dim);
+    font-size: 0.8rem;
+    letter-spacing: 0.1em;
+  }
+
+  figcaption {
+    padding: 0.8rem 1rem 1rem;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 0.8rem;
+  }
+
+  .row strong {
+    font-size: 0.92rem;
+  }
+
+  time {
+    font-size: 0.75rem;
+    color: var(--amber-deep);
+    letter-spacing: 0.06em;
+  }
+
+  .cap {
+    display: block;
+    margin-top: 0.35rem;
+    font-size: 0.82rem;
+    color: var(--ink-dim);
+  }
+
+  .gear {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.72rem;
+    color: var(--ink-dim);
+    letter-spacing: 0.04em;
+  }
+</style>

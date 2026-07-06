@@ -1,0 +1,304 @@
+---
+import { getCollection } from 'astro:content';
+import { Image, getImage } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+
+const pieces = (await getCollection('art')).sort(
+  (a, b) =>
+    a.data.order - b.data.order ||
+    (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0),
+);
+
+// pre-render a large variant of each image for the lightbox
+const withLarge = await Promise.all(
+  pieces.map(async (piece) => ({
+    piece,
+    large: piece.data.image
+      ? await getImage({ src: piece.data.image, width: 1600 })
+      : null,
+  })),
+);
+
+function iso(date: Date | undefined): string {
+  return date ? date.toISOString().slice(0, 10) : '';
+}
+---
+
+<Base
+  title="art"
+  description="Painting, drawing, pastel, spray paint — the whole wall at a glance."
+>
+  <h1>art</h1>
+  <p class="lede">
+    Painting, drawing, pastel, spray paint. This work used to go to
+    Instagram; now it hangs here instead — no feed, no algorithm, just the
+    wall. Click a piece to see it properly.
+  </p>
+
+  {
+    pieces.length === 0 ? (
+      <p class="dim">walls are bare at the moment — pieces coming soon.</p>
+    ) : (
+      <div class="gallery">
+        {withLarge.map(({ piece, large }) =>
+          piece.data.image && large ? (
+            <a
+              class="piece"
+              href={large.src}
+              title={piece.data.title}
+              data-title={piece.data.title}
+              data-medium={piece.data.medium ?? ''}
+              data-date={iso(piece.data.date)}
+              data-caption={piece.data.caption ?? ''}
+            >
+              <Image
+                src={piece.data.image}
+                alt={piece.data.title}
+                width={600}
+                loading="lazy"
+              />
+            </a>
+          ) : (
+            <div class="piece no-photo">
+              <span>photo pending</span>
+              <span class="np-title">{piece.data.title}</span>
+            </div>
+          ),
+        )}
+      </div>
+    )
+  }
+
+  <dialog id="lightbox" aria-label="Artwork viewer">
+    <button class="close" data-close aria-label="Close">×</button>
+    <button class="nav prev" data-prev aria-label="Previous piece">←</button>
+    <figure>
+      <img src="" alt="" />
+      <figcaption>
+        <span class="row">
+          <strong data-lb-title></strong>
+          <span class="medium" data-lb-medium></span>
+          <time data-lb-date></time>
+        </span>
+        <span class="cap" data-lb-caption></span>
+      </figcaption>
+    </figure>
+    <button class="nav next" data-next aria-label="Next piece">→</button>
+  </dialog>
+</Base>
+
+<script>
+  const dialog = document.getElementById('lightbox') as HTMLDialogElement;
+  const image = dialog.querySelector('img') as HTMLImageElement;
+  const title = dialog.querySelector('[data-lb-title]') as HTMLElement;
+  const medium = dialog.querySelector('[data-lb-medium]') as HTMLElement;
+  const date = dialog.querySelector('[data-lb-date]') as HTMLElement;
+  const caption = dialog.querySelector('[data-lb-caption]') as HTMLElement;
+  const anchors = [...document.querySelectorAll<HTMLAnchorElement>('a.piece')];
+
+  let current = 0;
+
+  function show(index: number) {
+    current = (index + anchors.length) % anchors.length;
+    const a = anchors[current];
+    image.src = a.href;
+    image.alt = a.dataset.title ?? '';
+    title.textContent = a.dataset.title ?? '';
+    medium.textContent = a.dataset.medium ?? '';
+    date.textContent = a.dataset.date ?? '';
+    caption.textContent = a.dataset.caption ?? '';
+    caption.style.display = a.dataset.caption ? '' : 'none';
+    if (!dialog.open) dialog.showModal();
+  }
+
+  anchors.forEach((a, index) => {
+    a.addEventListener('click', (event) => {
+      event.preventDefault();
+      show(index);
+    });
+  });
+
+  dialog.querySelector('[data-close]')?.addEventListener('click', () => dialog.close());
+  dialog.querySelector('[data-prev]')?.addEventListener('click', () => show(current - 1));
+  dialog.querySelector('[data-next]')?.addEventListener('click', () => show(current + 1));
+
+  dialog.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowLeft') show(current - 1);
+    if (event.key === 'ArrowRight') show(current + 1);
+  });
+
+  // click on the backdrop (outside the figure) closes
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+</script>
+
+<style>
+  /* masonry: as many 15rem columns as fit, pieces keep natural aspect */
+  .gallery {
+    columns: 15rem;
+    column-gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .piece {
+    display: block;
+    break-inside: avoid;
+    margin: 0 0 1rem;
+  }
+
+  a.piece {
+    border: 1px solid var(--panel-edge);
+    border-radius: 3px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+
+  a.piece:hover,
+  a.piece:focus-visible {
+    border-color: var(--amber-deep);
+  }
+
+  .piece img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .no-photo {
+    aspect-ratio: 4 / 5;
+    display: grid;
+    place-content: center;
+    gap: 0.4rem;
+    text-align: center;
+    color: var(--ink-dim);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    border: 1px solid var(--panel-edge);
+    border-radius: 3px;
+    background: var(--panel);
+  }
+
+  .np-title {
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    opacity: 0.8;
+  }
+
+  /* ---- lightbox ---- */
+
+  dialog {
+    background: transparent;
+    border: none;
+    padding: 0;
+    max-width: 100vw;
+    max-height: 100vh;
+    outline: none;
+  }
+
+  dialog::backdrop {
+    background: rgba(7, 9, 7, 0.92);
+  }
+
+  dialog figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  dialog img {
+    max-width: min(92vw, 70rem);
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+    border: 1px solid var(--panel-edge);
+    border-radius: 3px;
+  }
+
+  dialog figcaption {
+    font-family: var(--font-mono);
+    color: var(--ink);
+    max-width: min(92vw, 44rem);
+    text-align: center;
+  }
+
+  dialog .row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  dialog .medium {
+    color: var(--ink-dim);
+    font-style: italic;
+    font-size: 0.8rem;
+  }
+
+  dialog time {
+    color: var(--amber-deep);
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+  }
+
+  dialog .cap {
+    display: block;
+    margin-top: 0.4rem;
+    color: var(--ink-dim);
+    font-size: 0.82rem;
+  }
+
+  dialog button {
+    position: fixed;
+    font-family: var(--font-mono);
+    background: var(--panel);
+    color: var(--ink);
+    border: 1px solid var(--panel-edge);
+    border-radius: 3px;
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  dialog button:hover {
+    color: var(--amber);
+    border-color: var(--amber-deep);
+  }
+
+  dialog .close {
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.1rem;
+    padding: 0.2rem 0.7rem;
+  }
+
+  dialog .nav {
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem;
+  }
+
+  dialog .prev {
+    left: 1rem;
+  }
+
+  dialog .next {
+    right: 1rem;
+  }
+
+  @media (max-width: 640px) {
+    dialog .nav {
+      top: auto;
+      bottom: 1rem;
+      transform: none;
+    }
+
+    dialog img {
+      max-height: 70vh;
+    }
+  }
+</style>

@@ -1,0 +1,43 @@
+.status-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-rows .svc {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.55rem 0;
+  font-size: 0.9rem;
+  border-bottom: 1px solid var(--panel-edge);
+}
+
+.status-rows .svc:last-child {
+  border-bottom: 0;
+}
+
+.status-rows .name {
+  flex: 1;
+}
+
+.status-rows .up24 {
+  font-size: 0.68rem;
+  color: var(--ink-dim);
+  letter-spacing: 0.05em;
+}
+
+.status-rows .st {
+  font-size: 0.68rem;
+  color: var(--ink-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  min-width: 5.5rem;
+  text-align: right;
+}
+
+.status-board .board-note,
+.board-note {
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+  margin: 0.8rem 0 0;
+}

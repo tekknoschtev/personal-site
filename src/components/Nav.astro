@@ -1,0 +1,86 @@
+---
+const links = [
+  { href: '/', label: 'hub' },
+  { href: '/projects', label: 'projects' },
+  { href: '/workshop', label: 'workshop' },
+  { href: '/art', label: 'art' },
+  { href: '/sky', label: 'sky' },
+  { href: '/homelab', label: 'homelab' },
+  { href: '/log', label: 'log' },
+  { href: '/about', label: 'about' },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+---
+
+<header>
+  <nav aria-label="Main">
+    <a class="site-name" href="/">sjschroeder.com</a>
+    <ul>
+      {
+        links.map((link) => (
+          <li>
+            <a
+              href={link.href}
+              aria-current={path === link.href ? 'page' : undefined}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </nav>
+</header>
+
+<style>
+  header {
+    border-bottom: 1px solid var(--panel-edge);
+  }
+
+  nav {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 1.1rem 1.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  .site-name {
+    color: var(--amber);
+    font-weight: 700;
+    text-decoration: none;
+    margin-right: auto;
+  }
+
+  .site-name:hover {
+    color: var(--ink);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  ul a {
+    color: var(--ink-dim);
+    text-decoration: none;
+    padding-bottom: 2px;
+  }
+
+  ul a:hover {
+    color: var(--ink);
+  }
+
+  ul a[aria-current='page'] {
+    color: var(--amber);
+    border-bottom: 2px solid var(--amber-deep);
+  }
+</style>

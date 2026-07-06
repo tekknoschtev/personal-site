@@ -1,0 +1,150 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import StatusBoard from '../components/StatusBoard.tsx';
+
+// every project with a Kuma monitor appears on the board
+const monitored = (await getCollection('projects'))
+  .filter((project) => project.data.monitor)
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((project) => ({
+    key: project.data.monitor as string,
+    label: project.data.title,
+  }));
+
+const sections = [
+  { href: '/projects', name: 'projects', desc: 'games and apps, self-hosted. the launcher.' },
+  { href: '/workshop', name: 'workshop', desc: 'woodworking. sawdust and finish.' },
+  { href: '/art', name: 'art', desc: 'paint, pastel, spray. the quiet gallery.' },
+  { href: '/sky', name: 'sky', desc: 'astrophotography. early days, honestly.' },
+  { href: '/homelab', name: 'homelab', desc: 'the rack that runs this place.' },
+  { href: '/log', name: 'log', desc: 'site & project changelog.' },
+  { href: '/about', name: 'about', desc: "who's typing." },
+];
+---
+
+<Base title="sjschroeder.com">
+  <section class="hero">
+    <p class="prompt">whoami <span class="out">maker &amp; DIYer</span><span class="cursor" aria-hidden="true"></span></p>
+    <h1>I make things — <em>code, wood, art, and sky.</em></h1>
+    <p class="lede">
+      Software, furniture, paintings, photos of the night sky — and the server
+      rack in the basement that hosts all of it. This site is the front door:
+      most of the interesting stuff lives on its own subdomain, or out in the
+      physical world.
+    </p>
+  </section>
+
+  <div class="rack">
+    <section class="module" aria-label="Systems status">
+      <div class="rail"><h2>Systems</h2></div>
+      <StatusBoard client:idle services={monitored} />
+    </section>
+
+    <section class="module" aria-label="Sections">
+      <div class="rail"><h2>Index</h2></div>
+      <div class="dirs">
+        {
+          sections.map((section) => (
+            <a class="dir" href={section.href}>
+              <span class="name">{section.name}</span>
+              <span class="desc">{section.desc}</span>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .hero {
+    padding: 2rem 0 1.5rem;
+  }
+
+  .hero .prompt {
+    color: var(--ink-dim);
+    font-size: 0.85rem;
+    margin: 0 0 0.9rem;
+  }
+
+  .hero .prompt::before {
+    content: '$ ';
+    color: var(--amber-deep);
+  }
+
+  .hero .prompt .out {
+    color: var(--green);
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 0.55em;
+    height: 1em;
+    margin-left: 0.35em;
+    background: var(--ink-dim);
+    vertical-align: text-bottom;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .cursor {
+      animation: blink 1.2s steps(1) infinite;
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .hero h1 {
+    margin: 0 0 1.1rem;
+  }
+
+  .hero .lede {
+    margin: 0;
+    font-size: 0.98rem;
+  }
+
+  .rack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .dirs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.2rem 2rem;
+  }
+
+  .dir {
+    display: block;
+    padding: 0.55rem 0;
+    text-decoration: none;
+    border-bottom: 1px solid var(--panel-edge);
+  }
+
+  .dir .name {
+    color: var(--ink);
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+
+  .dir:hover .name {
+    color: var(--amber);
+  }
+
+  .dir .desc {
+    color: var(--ink-dim);
+    font-size: 0.8rem;
+    display: block;
+  }
+
+  @media (max-width: 560px) {
+    .dirs {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

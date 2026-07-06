@@ -1,0 +1,83 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const entries = (await getCollection('log')).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+
+const rendered = await Promise.all(
+  entries.map(async (entry) => ({
+    entry,
+    Content: (await render(entry)).Content,
+  })),
+);
+
+function iso(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+---
+
+<Base title="log" description="Changelog for the site and projects. Not a blog.">
+  <h1>log</h1>
+  <p class="lede">
+    A changelog for the site and projects — not a blog. Entries are short, and
+    show up when there's something to say.
+  </p>
+
+  <div class="entries">
+    {
+      rendered.map(({ entry, Content }) => (
+        <article class="entry">
+          <p class="stamp">
+            <time datetime={iso(entry.data.date)}>{iso(entry.data.date)}</time>
+            {entry.data.title ? <span class="headline">{entry.data.title}</span> : null}
+          </p>
+          <div class="body">
+            <Content />
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .entries {
+    margin-top: 2rem;
+  }
+
+  .entry {
+    padding: 1rem 0;
+    border-top: 1px solid var(--panel-edge);
+  }
+
+  .stamp {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  time {
+    font-size: 0.78rem;
+    color: var(--amber-deep);
+    letter-spacing: 0.06em;
+  }
+
+  .headline {
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+
+  .body {
+    font-size: 0.9rem;
+    color: var(--ink-dim);
+    max-width: 42rem;
+  }
+
+  .body :global(p) {
+    margin: 0.4rem 0 0;
+  }
+</style>

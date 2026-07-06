@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Scaffold with known facts; owner fills in the real writeup.
+// PLACEHOLDER rows are marked dim in the tables below.
+const hardware = [
+  { item: 'Dell R620', role: 'the rack workhorse — Proxmox host' },
+  { item: 'ZFS pool "storage"', role: 'bulk storage for VMs, containers, and backups' },
+  { item: '— placeholder —', role: 'networking, UPS, shelf inventory to be filled in' },
+];
+
+const services = [
+  { name: 'Proxmox', what: 'hypervisor — everything below runs in LXC containers or VMs' },
+  { name: 'nginx', what: 'serves this site (and eventually friends) over local HTTP' },
+  { name: 'cloudflared', what: 'Cloudflare tunnels — nothing inbound, TLS at the edge' },
+  { name: 'Uptime Kuma', what: 'monitoring; feeds the status board on the hub' },
+  { name: 'InfluxDB / Grafana / Telegraf', what: 'metrics stack — graphs for the sake of graphs, mostly' },
+  { name: 'Colyseus', what: 'game server for the dungeon crawler' },
+  { name: '— placeholder —', what: 'the rest of the service inventory to be filled in' },
+];
+---
+
+<Base
+  title="homelab"
+  description="Proxmox on a Dell R620 — the rack and the stack that host everything here."
+>
+  <h1>homelab</h1>
+  <p class="lede">
+    Everything on this site — including this site — runs from a rack in my
+    basement. No cloud bill, no black boxes: if it's broken, it's broken
+    because of me, and I like it that way.
+  </p>
+
+  <h2>hardware</h2>
+  <p class="dim">what the rack physically is.</p>
+  <table>
+    <tbody>
+      {
+        hardware.map((row) => (
+          <tr class:list={row.item.includes('placeholder') ? 'placeholder' : undefined}>
+            <th scope="row">{row.item}</th>
+            <td>{row.role}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+
+  <h2>services</h2>
+  <p class="dim">what it runs.</p>
+  <table>
+    <tbody>
+      {
+        services.map((row) => (
+          <tr class:list={row.name.includes('placeholder') ? 'placeholder' : undefined}>
+            <th scope="row">{row.name}</th>
+            <td>{row.what}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+
+  <h2>how it's managed</h2>
+  <p>
+    Ansible playbooks from a WSL2 workstation — the containers are meant to be
+    rebuildable, not precious. Public-facing things get out through Cloudflare
+    tunnels rather than open ports; TLS terminates at the edge, so the local
+    stack stays plain HTTP.
+  </p>
+  <p class="dim">
+    — placeholder: the fuller "here's what I run and why" writeup goes here. —
+  </p>
+</Base>
+
+<style>
+  h2 {
+    margin-top: 2.5rem;
+  }
+
+  h2 + .dim {
+    margin-top: 0;
+    font-size: 0.85rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  tr {
+    border-top: 1px solid var(--panel-edge);
+  }
+
+  tr:last-child {
+    border-bottom: 1px solid var(--panel-edge);
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.6rem 0;
+    vertical-align: top;
+    font-weight: 400;
+  }
+
+  th {
+    color: var(--amber);
+    white-space: nowrap;
+    padding-right: 2rem;
+    width: 1%;
+  }
+
+  td {
+    color: var(--ink-dim);
+  }
+
+  tr.placeholder th,
+  tr.placeholder td {
+    color: var(--ink-dim);
+    opacity: 0.6;
+    font-style: italic;
+  }
+
+  @media (max-width: 560px) {
+    th {
+      white-space: normal;
+      padding-right: 1rem;
+    }
+  }
+</style>
