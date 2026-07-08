@@ -1,0 +1,75 @@
+---
+# One-time bootstrap of an Uptime Kuma container (bare Node in an LXC,
+# no Docker — same pattern as the site container). Create a small
+# Debian 12 LXC first (1 CPU / 1 GB / 8 GB is plenty), get your SSH key
+# in, add it to the inventory as [kuma], then:
+#
+#   ansible-playbook -i inventory kuma.yml
+#
+# Kuma then answers on http://<ip>:3001 — create the admin account in
+# the browser. Monitors/status page are configured in the UI (see
+# README section 4). Kuma's data lives in /opt/uptime-kuma/data.
+
+- name: bootstrap uptime kuma container
+  hosts: kuma
+  become: true
+
+  vars:
+    # check https://github.com/louislam/uptime-kuma/releases and bump
+    kuma_version: "1.23.16"
+    app: /opt/uptime-kuma
+
+  tasks:
+    - name: install packages
+      ansible.builtin.apt:
+        name:
+          - git
+          - curl
+          - ca-certificates
+        update_cache: true
+
+    - name: add nodesource apt repo
+      ansible.builtin.shell: curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      args:
+        creates: /etc/apt/sources.list.d/nodesource.list
+
+    - name: install node 20
+      ansible.builtin.apt:
+        name: nodejs
+        update_cache: true
+
+    - name: clone uptime kuma at the pinned release
+      ansible.builtin.git:
+        repo: https://github.com/louislam/uptime-kuma.git
+        dest: "{{ app }}"
+        version: "{{ kuma_version }}"
+
+    - name: install dependencies and download the frontend
+      ansible.builtin.command: npm run setup
+      args:
+        chdir: "{{ app }}"
+        creates: "{{ app }}/dist"
+
+    - name: install systemd unit
+      ansible.builtin.copy:
+        dest: /etc/systemd/system/uptime-kuma.service
+        content: |
+          [Unit]
+          Description=Uptime Kuma
+          After=network.target
+
+          [Service]
+          Type=simple
+          WorkingDirectory=/opt/uptime-kuma
+          ExecStart=/usr/bin/node server/server.js
+          Restart=on-failure
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: start and enable uptime kuma
+      ansible.builtin.systemd:
+        name: uptime-kuma
+        state: started
+        enabled: true
+        daemon_reload: true

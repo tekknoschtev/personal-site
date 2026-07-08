@@ -1,4 +1,10 @@
-# hand-type as ~/homelab/inventory (or merge into your existing one).
-# fix the IP to whatever the LXC gets on 192.168.4.x.
+# copy into your ~/homelab inventory (file or directory — if it's a
+# directory, name this something like inventory/site and delete any
+# stray inventory.example, since ansible loads every file in the dir).
+# fix the IPs to whatever the LXCs actually get on 192.168.4.x.
 [site]
 192.168.4.50 ansible_user=root
+
+# uncomment once the kuma container exists (see kuma.yml)
+#[kuma]
+#192.168.4.51 ansible_user=root

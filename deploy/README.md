@@ -97,13 +97,31 @@ TLS terminates at Cloudflare's edge — nothing to renew locally, ever.
 
 ## 4. One-time: wire up Uptime Kuma
 
-Once Kuma is running in the homelab (its own LXC/container, adjacent to
-this build):
+Standing Kuma up is a playbook too — `kuma.yml` in this directory
+(bare Node in its own small LXC, systemd-managed, no Docker). Create a
+Debian 12 container (1 CPU / 1 GB / 8 GB), get your key in, add it to
+the inventory as `[kuma]`, then:
+
+```sh
+ansible-playbook -i inventory kuma.yml
+```
+
+Kuma answers on `http://<kuma-ip>:3001` — open it and create the admin
+account. Its data (monitors, history) lives in `/opt/uptime-kuma/data`;
+include that path in backups if you start caring about uptime history.
+The version is pinned in the playbook's `kuma_version` var — check the
+Kuma releases page and bump deliberately.
+
+Once Kuma is running:
 
 1. In Kuma, add monitors for `dungeon`, `trackboard`, and Astral
    Surveyor's public URL. Monitor names must slugify to the `monitor`
    values in the project frontmatter (`Astral Surveyor` →
-   `astral-surveyor` is fine).
+   `astral-surveyor` is fine). Monitor the **public** URLs
+   (`https://dungeon.sjschroeder.com` etc.) rather than LAN addresses —
+   that tests the whole path visitors take, tunnel included. Adding a
+   monitor for `https://sjschroeder.com` itself is fair game too; extra
+   monitors show up on the hub board automatically.
 2. Create a status page (slug `public`) and put every monitor on it.
 3. Point the site at it — pick one:
    - **Same-origin proxy (recommended, no CORS):** uncomment the
