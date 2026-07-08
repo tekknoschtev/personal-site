@@ -155,6 +155,16 @@ every hour, only publishes when the build succeeds):
 
 ## Troubleshooting
 
+- **Status board dark, network tab shows a JSON 404 on `…/status-page/public`** —
+  the proxy is fine (JSON means Kuma answered); Kuma has no status page
+  with that slug. Check the page's URL in Kuma (`/status/<slug>`) and
+  either set its slug to `public` or set `PUBLIC_KUMA_PAGE=<slug>` in
+  `.env` + `deploy-site`. Also confirm the monitors are actually added
+  to the page and it's saved/published. Sanity check:
+  `curl http://<kuma-ip>:3001/api/status-page/public` should list your
+  monitors. Kuma-side fixes need no site rebuild; `.env` changes do.
+- **Status board dark, 404 is HTML** — the request never reached Kuma;
+  recheck the `/kuma/` block in the nginx config and `nginx -t`.
 - `nginx -t` — config check after editing the site config.
 - `journalctl -u cloudflared -f` — tunnel connectivity.
 - `node --version` — should be 22.x; the playbook pins NodeSource.
