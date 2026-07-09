@@ -135,6 +135,26 @@ Once Kuma is running:
 Grey LEDs and "status unavailable" are the designed fallback whenever
 Kuma is unreachable — the site never breaks because monitoring is down.
 
+### Optional: public status page (status.sjschroeder.com)
+
+Kuma status pages are anonymous by design — only the admin dashboard is
+behind the login — so exposing one publicly is safe and useful:
+
+1. Tunnel: add a published application route — hostname
+   `status.sjschroeder.com`, service HTTP `→ <kuma-ip>:3001`. Origin
+   only: no path in the service URL.
+2. Kuma: status page settings → **Domain Names** → add the **bare
+   hostname** (`status.sjschroeder.com` — no `https://`, no trailing
+   slash; Kuma matches the Host header and a scheme breaks the match) →
+   Save. The bare domain now serves the status page at its root.
+3. Hardening (optional): the hostname also exposes Kuma's login form at
+   `/dashboard`. To hide the admin surface entirely, add Cloudflare
+   Access apps scoped to `status.sjschroeder.com/dashboard` and
+   `/socket.io` (allow only yourself), or a WAF rule blocking those
+   paths. The status page needs `/status/<slug>`, `/api/status-page/*`,
+   `/assets/*`, and `/upload/*` left open. LAN admin via the container
+   IP is unaffected either way.
+
 ## 5. Every deploy after that
 
 ```sh
